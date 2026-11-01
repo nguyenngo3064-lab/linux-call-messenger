@@ -1,0 +1,20 @@
+[Unit]
+Description=Virtual X display for Messenger Call Keeper browser
+After=local-fs.target
+
+[Service]
+Type=simple
+User=messenger-call-keeper
+Group=messenger-call-keeper
+Environment=HOME=/var/lib/messenger-call-keeper
+ExecStart=/usr/bin/Xvfb :99 -screen 0 1280x800x24 -nolisten tcp -noreset
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateDevices=true
+ReadWritePaths=/tmp
+
+[Install]
+WantedBy=multi-user.target

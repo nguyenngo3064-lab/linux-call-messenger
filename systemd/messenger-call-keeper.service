@@ -1,0 +1,28 @@
+[Unit]
+Description=Messenger Call Keeper management backend
+After=network-online.target messenger-call-keeper-xvfb.service
+Wants=network-online.target
+Requires=messenger-call-keeper-xvfb.service
+StartLimitIntervalSec=120
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=messenger-call-keeper
+Group=messenger-call-keeper
+WorkingDirectory=/opt/messenger-call-keeper
+EnvironmentFile=/etc/messenger-call-keeper/mck.env
+Environment=HOME=/var/lib/messenger-call-keeper
+ExecStart=/opt/messenger-call-keeper/.venv/bin/uvicorn backend.app:app --host 127.0.0.1 --port 8000 --workers 1
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=15
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateDevices=false
+ReadWritePaths=/var/lib/messenger-call-keeper /var/log/messenger-call-keeper /tmp
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target

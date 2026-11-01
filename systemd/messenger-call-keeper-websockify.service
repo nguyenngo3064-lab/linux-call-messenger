@@ -1,0 +1,20 @@
+[Unit]
+Description=Loopback-only noVNC websocket proxy for login setup
+After=messenger-call-keeper-vnc.service
+Requires=messenger-call-keeper-vnc.service
+
+[Service]
+Type=simple
+User=messenger-call-keeper
+Group=messenger-call-keeper
+Environment=HOME=/var/lib/messenger-call-keeper
+ExecStart=/usr/bin/websockify --web=/usr/share/novnc/ 127.0.0.1:6080 127.0.0.1:5900
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateDevices=true
+
+[Install]
+WantedBy=multi-user.target

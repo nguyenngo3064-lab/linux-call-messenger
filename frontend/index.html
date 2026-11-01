@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f2f4ef">
+  <title>Messenger Call Keeper</title>
+  <link rel="stylesheet" href="/assets/app.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+  <main id="login-view" class="login-view" hidden>
+    <section class="login-panel" aria-labelledby="login-title">
+      <div class="brand-mark" aria-hidden="true">M</div>
+      <p class="eyebrow">VPS CONTROL PLANE</p>
+      <h1 id="login-title">Call Keeper</h1>
+      <p class="muted">Đăng nhập để quản lý phiên trình duyệt và tài nguyên máy chủ.</p>
+      <form id="login-form">
+        <label for="admin-password">Mật khẩu quản trị</label>
+        <input id="admin-password" name="password" type="password" autocomplete="current-password" required minlength="12">
+        <button class="button button-primary full-width" type="submit">Đăng nhập</button>
+      </form>
+      <p id="login-error" class="form-error" role="alert"></p>
+    </section>
+  </main>
+
+  <div id="dashboard-view" class="app-shell" hidden>
+    <aside class="sidebar">
+      <a class="brand" href="/" aria-label="Call Keeper, trang tổng quan">
+        <span class="brand-mark" aria-hidden="true">M</span>
+        <span><strong>Call Keeper</strong><small>VPS edition</small></span>
+      </a>
+      <div class="nav-label">GIÁM SÁT</div>
+      <a class="nav-item active" href="#overview"><span class="nav-symbol" aria-hidden="true">/</span>Tổng quan</a>
+      <div class="sidebar-bottom">
+        <span class="service-dot" aria-hidden="true"></span>
+        <span><strong>Backend</strong><small id="backend-uptime">Đang kiểm tra</small></span>
+      </div>
+    </aside>
+
+    <main class="main-content" id="overview">
+      <header class="topbar">
+        <div><p class="eyebrow">HỆ THỐNG</p><h1>Tổng quan</h1></div>
+        <nav class="view-tabs" aria-label="Các trang quản trị">
+          <button class="view-tab active" data-view="overview" type="button">Tổng quan</button>
+          <button class="view-tab" data-view="logs" type="button">Nhật ký</button>
+          <button class="view-tab" data-view="settings" type="button">Cài đặt</button>
+        </nav>
+        <div class="top-actions">
+          <span id="last-updated" class="muted small-text">Đang tải số liệu...</span>
+          <button id="logout-button" class="button button-quiet" type="button">Đăng xuất</button>
+        </div>
+      </header>
+
+      <div id="notice" class="notice" role="status" hidden></div>
+
+      <section id="overview-view" class="page-view">
+      <section class="metrics-grid" aria-label="Tài nguyên hệ thống">
+        <article class="metric-panel metric-cpu">
+          <div class="metric-heading"><span>CPU</span><span class="metric-mark" aria-hidden="true">01</span></div>
+          <div class="metric-value"><strong id="cpu-value">--</strong><span>%</span></div>
+          <div class="meter"><span id="cpu-meter"></span></div>
+          <p id="cpu-detail" class="metric-foot">Đang đọc bộ xử lý</p>
+        </article>
+        <article class="metric-panel metric-memory">
+          <div class="metric-heading"><span>BỘ NHỚ</span><span class="metric-mark" aria-hidden="true">02</span></div>
+          <div class="metric-value"><strong id="memory-value">--</strong><span>%</span></div>
+          <div class="meter"><span id="memory-meter"></span></div>
+          <p id="memory-detail" class="metric-foot">Đang đọc RAM</p>
+        </article>
+        <article class="metric-panel metric-swap">
+          <div class="metric-heading"><span>SWAP</span><span class="metric-mark" aria-hidden="true">03</span></div>
+          <div class="metric-value"><strong id="swap-value">--</strong><span>%</span></div>
+          <div class="meter"><span id="swap-meter"></span></div>
+          <p id="swap-detail" class="metric-foot">Đang đọc swap</p>
+        </article>
+        <article class="metric-panel metric-disk">
+          <div class="metric-heading"><span>Ổ ĐĨA ROOT</span><span class="metric-mark" aria-hidden="true">04</span></div>
+          <div class="metric-value"><strong id="disk-value">--</strong><span>%</span></div>
+          <div class="meter"><span id="disk-meter"></span></div>
+          <p id="disk-detail" class="metric-foot">Đang đọc dung lượng</p>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="surface monitor-surface">
+          <div class="section-heading">
+            <div><p class="eyebrow">TÀI NGUYÊN</p><h2>CPU &amp; bộ nhớ</h2></div>
+            <span class="live-label"><i></i> Trực tiếp</span>
+          </div>
+          <div class="chart-wrap"><canvas id="history-chart" aria-label="Biểu đồ lịch sử CPU và RAM"></canvas></div>
+          <div class="chart-legend"><span><i class="legend-cpu"></i>CPU</span><span><i class="legend-memory"></i>RAM</span></div>
+        </article>
+
+        <article class="surface call-surface">
+          <div class="section-heading"><div><p class="eyebrow">MESSENGER</p><h2>Trạng thái cuộc gọi</h2></div></div>
+          <div class="verification-state"><span class="state-ring" aria-hidden="true">?</span><div><strong id="call-state">Chưa xác minh</strong><p id="call-reason">Chưa có tín hiệu từ Messenger/WebRTC.</p></div></div>
+          <dl class="detail-list">
+            <div><dt>WebRTC</dt><dd id="webrtc-state">Không khả dụng</dd></div>
+            <div><dt>Thời lượng cuộc gọi</dt><dd id="call-duration">--</dd></div>
+          </dl>
+          <p class="disclaimer">Không suy diễn trạng thái cuộc gọi từ việc trình duyệt đang mở.</p>
+        </article>
+
+        <article class="surface browser-surface">
+          <div class="section-heading"><div><p class="eyebrow">BROWSER MANAGER</p><h2>Trình duyệt</h2></div><span id="browser-state" class="status-pill">Đang kiểm tra</span></div>
+          <div class="browser-main"><div class="browser-glyph" aria-hidden="true">B</div><div><strong id="browser-name">Firefox ESR</strong><p id="browser-version">Đang kiểm tra phiên bản</p></div></div>
+          <div class="browser-stats">
+            <div><span>Bộ nhớ</span><strong id="browser-memory">--</strong></div>
+            <div><span>CPU</span><strong id="browser-cpu">--</strong></div>
+            <div><span>Khởi động lại</span><strong id="browser-restarts">0</strong></div>
+            <div><span>Thời gian chạy</span><strong id="browser-uptime">--</strong></div>
+          </div>
+          <p id="browser-warning" class="inline-warning" hidden></p>
+          <div class="button-row"><button id="browser-start" class="button button-primary" type="button">Khởi chạy browser</button><button id="browser-stop" class="button button-secondary" type="button">Dừng</button></div>
+        </article>
+
+        <article class="surface host-surface">
+          <div class="section-heading"><div><p class="eyebrow">MÁY CHỦ</p><h2>Thông tin VPS</h2></div><span class="host-symbol" aria-hidden="true">SYS</span></div>
+          <dl class="detail-list host-details">
+            <div><dt>CPU model</dt><dd id="host-cpu">--</dd></div>
+            <div><dt>CPU cores</dt><dd id="host-cores">--</dd></div>
+            <div><dt>Nhiệt độ CPU</dt><dd id="host-temperature">Không khả dụng</dd></div>
+            <div><dt>RAM</dt><dd id="host-memory">--</dd></div>
+            <div><dt>Đĩa đã dùng</dt><dd id="host-disk">--</dd></div>
+            <div><dt>Uptime</dt><dd id="host-uptime">--</dd></div>
+            <div><dt>Hệ điều hành</dt><dd id="host-os">--</dd></div>
+            <div><dt>Kernel</dt><dd id="host-kernel">--</dd></div>
+            <div><dt>IP nội bộ</dt><dd id="host-ip">Không khả dụng</dd></div>
+            <div><dt>Mạng RX / TX</dt><dd id="host-network">--</dd></div>
+            <div><dt>Process zombie</dt><dd id="host-zombies">--</dd></div>
+            <div><dt>OOM kills</dt><dd id="host-oom">Không khả dụng</dd></div>
+          </dl>
+        </article>
+      </section>
+      </section>
+
+      <section id="logs-view" class="page-view" hidden>
+        <div class="page-title-row"><div><p class="eyebrow">DIAGNOSTICS</p><h2>Nhật ký sự kiện</h2></div><div class="button-row"><button id="export-button" class="button button-secondary" type="button">Xuất chẩn đoán</button><button id="clear-logs-button" class="button button-secondary" type="button">Xóa nhật ký</button></div></div>
+        <article class="surface log-surface">
+          <div class="table-wrap"><table><thead><tr><th>Thời gian</th><th>Mức</th><th>Sự kiện</th><th>Chi tiết</th></tr></thead><tbody id="log-rows"><tr><td colspan="4" class="empty-state">Chưa có sự kiện được ghi nhận.</td></tr></tbody></table></div>
+        </article>
+      </section>
+
+      <section id="settings-view" class="page-view" hidden>
+        <div class="page-title-row"><div><p class="eyebrow">CẤU HÌNH</p><h2>Thiết lập hệ thống</h2></div></div>
+        <form id="settings-form" class="settings-grid">
+          <section class="surface settings-group"><p class="eyebrow">TÀI NGUYÊN</p><h3>Chế độ vận hành</h3>
+            <label for="setting-mode">Chế độ tiết kiệm</label><select id="setting-mode" name="mode"><option value="eco">Eco</option><option value="balanced">Balanced</option><option value="performance">Performance</option></select>
+            <label for="setting-ram">Cảnh báo RAM (%)</label><input id="setting-ram" name="memory_warning_percent" type="number" min="50" max="99" required>
+            <label for="setting-history">Giữ lịch sử (ngày)</label><input id="setting-history" name="history_days" type="number" min="1" max="90" required>
+          </section>
+          <section class="surface settings-group"><p class="eyebrow">BROWSER MANAGER</p><h3>Trình duyệt</h3>
+            <label for="setting-browser">Browser</label><select id="setting-browser" name="browser_name"><option value="firefox-esr">Firefox ESR</option><option value="firefox">Firefox</option><option value="chromium">Chromium</option></select>
+            <label class="toggle-row" for="setting-autostart"><span>Tự khởi chạy browser cùng backend</span><input id="setting-autostart" name="browser_auto_start" type="checkbox"></label>
+            <label class="toggle-row" for="setting-autorestart"><span>Khởi động lại khi browser crash</span><input id="setting-autorestart" name="browser_auto_restart" type="checkbox"></label>
+            <label for="setting-check-interval">Chu kỳ kiểm tra tiến trình (giây)</label><input id="setting-check-interval" name="process_check_interval_seconds" type="number" min="3" max="60" required>
+          </section>
+          <section class="surface settings-group"><p class="eyebrow">LƯU TRỮ</p><h3>Log &amp; múi giờ</h3>
+            <label for="setting-log-size">Giới hạn log (MB)</label><input id="setting-log-size" name="log_size_mb" type="number" min="1" max="50" required>
+            <label for="setting-timezone">Múi giờ IANA</label><input id="setting-timezone" name="timezone" type="text" maxlength="64" placeholder="UTC" required>
+          </section>
+          <div class="settings-actions"><p id="settings-message" role="status"></p><button class="button button-primary" type="submit">Lưu cài đặt</button></div>
+        </form>
+        <section class="surface settings-group password-group"><p class="eyebrow">BẢO MẬT</p><h3>Đổi mật khẩu quản trị</h3>
+          <form id="password-form">
+            <label for="current-password">Mật khẩu hiện tại</label><input id="current-password" name="current_password" type="password" autocomplete="current-password" minlength="12" required>
+            <label for="new-password">Mật khẩu mới</label><input id="new-password" name="new_password" type="password" autocomplete="new-password" minlength="12" required>
+            <div class="password-submit"><p id="password-message" role="status"></p><button class="button button-secondary" type="submit">Cập nhật mật khẩu</button></div>
+          </form>
+        </section>
+      </section>
+      <footer class="page-footer"><span>MESSENGER CALL KEEPER</span><span id="sample-time">Số liệu chưa được cập nhật</span></footer>
+    </main>
+  </div>
+</body>
+</html>

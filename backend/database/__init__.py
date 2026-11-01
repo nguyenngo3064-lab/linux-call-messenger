@@ -1,0 +1,1 @@
+"""SQLite persistence for metrics, events, and non-secret settings."""
